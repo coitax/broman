@@ -1,9 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The manifest describes the app to Android: its icon, name, theme, and which
-     screen (Activity) launches when you tap the icon. -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- The manifest describes the app to Android: permissions, icon, name, theme,
+     and the screens/components that make alarms fire reliably. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Schedule exact alarms. USE_EXACT_ALARM is for apps whose core purpose is
+         alarms/clocks (granted at install). SCHEDULE_EXACT_ALARM covers Android
+         12 (API 31-32), where it's requested differently. -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+
+    <!-- Show the alarm screen over the lock screen (full-screen notification). -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- Post notifications (runtime-requested on Android 13+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Vibrate during the alarm. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Re-arm alarms after the phone reboots. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Keep the alarm sound playing reliably via a foreground service. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Turn the screen on when the alarm fires. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Ask to be exempt from battery optimization (so alarms aren't delayed). -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
+        android:name=".WakeWellApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -22,5 +48,42 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- The full-screen alarm screen. It shows over the lock screen and turns
+             the display on when an alarm fires. -->
+        <activity
+            android:name=".alarm.AlarmActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:showWhenLocked="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.WakeWell"
+            android:turnScreenOn="true" />
+
+        <!-- Receives the exact-alarm broadcast (works even in Doze). -->
+        <receiver
+            android:name=".alarm.AlarmReceiver"
+            android:exported="false" />
+
+        <!-- Re-arms saved alarms after the device boots. -->
+        <receiver
+            android:name=".alarm.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Foreground service that plays the alarm sound and vibration. -->
+        <service
+            android:name=".alarm.AlarmService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Plays the user's wake-up alarm sound and vibration on schedule." />
+        </service>
     </application>
 </manifest>
