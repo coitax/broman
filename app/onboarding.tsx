@@ -1,7 +1,9 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { track } from '@/analytics';
 import type { Intensity, MovementStyle } from '@/content/types';
+import { usePreferences } from '@/data/usePreferences';
 import { Button, Choice, Subtitle, Title } from '@/design/components';
 import { colors, spacing } from '@/design/tokens';
 
@@ -17,14 +19,24 @@ const STYLE_LABEL: Record<MovementStyle, string> = {
 
 export default function Onboarding() {
   const router = useRouter();
+  const { preferences, save } = usePreferences();
   const [minutes, setMinutes] = useState<number>(10);
   const [intensity, setIntensity] = useState<Intensity>('balanced');
   const [style, setStyle] = useState<MovementStyle>('yoga');
 
-  function begin() {
-    router.push(
-      `/journey?minutes=${minutes}&intensity=${intensity}&style=${style}`,
-    );
+  // Seed from any saved preferences once they load.
+  useEffect(() => {
+    if (preferences) {
+      setMinutes(preferences.totalMinutes);
+      setIntensity(preferences.intensity);
+      setStyle(preferences.movementStyle);
+    }
+  }, [preferences]);
+
+  async function begin() {
+    await save({ totalMinutes: minutes, intensity, movementStyle: style });
+    track({ name: 'onboarding_completed', minutes, intensity, style });
+    router.push(`/journey?minutes=${minutes}&intensity=${intensity}&style=${style}`);
   }
 
   return (
@@ -32,12 +44,7 @@ export default function Onboarding() {
       <Title>How much time this morning?</Title>
       <View style={styles.row}>
         {MINUTES.map((m) => (
-          <Choice
-            key={m}
-            label={`${m} min`}
-            selected={minutes === m}
-            onPress={() => setMinutes(m)}
-          />
+          <Choice key={m} label={`${m} min`} selected={minutes === m} onPress={() => setMinutes(m)} />
         ))}
       </View>
 
@@ -57,12 +64,7 @@ export default function Onboarding() {
       <Subtitle>We’ll lean into this style — you can change it anytime.</Subtitle>
       <View style={styles.row}>
         {STYLES.map((s) => (
-          <Choice
-            key={s}
-            label={STYLE_LABEL[s]}
-            selected={style === s}
-            onPress={() => setStyle(s)}
-          />
+          <Choice key={s} label={STYLE_LABEL[s]} selected={style === s} onPress={() => setStyle(s)} />
         ))}
       </View>
 

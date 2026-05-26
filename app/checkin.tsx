@@ -1,6 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { track } from '@/analytics';
+import { getRepository } from '@/data/repository';
 import { Button, Choice, Subtitle, Title } from '@/design/components';
 import { colors, fontSize, radius, spacing } from '@/design/tokens';
 
@@ -14,6 +16,14 @@ const ENCOURAGEMENT =
 export default function CheckIn() {
   const router = useRouter();
   const [mood, setMood] = useState<string | null>(null);
+
+  async function done() {
+    if (mood) {
+      await getRepository().saveCheckin({ mood, phase: 'post' });
+      track({ name: 'checkin_saved', mood, phase: 'post' });
+    }
+    router.replace('/');
+  }
 
   return (
     <View style={styles.screen}>
@@ -34,7 +44,7 @@ export default function CheckIn() {
       </View>
 
       <View style={styles.footer}>
-        <Button label="Done" onPress={() => router.replace('/')} />
+        <Button label="Done" onPress={done} />
       </View>
     </View>
   );

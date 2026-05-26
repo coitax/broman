@@ -1,8 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { track } from '@/analytics';
 import { sunriseFlow } from '@/content/manifests/sunriseFlow';
 import type { Intensity } from '@/content/types';
+import { getRepository } from '@/data/repository';
 import { getAudioEngine } from '@/engine/audioEngine';
 import { buildJourney } from '@/engine/JourneyEngine';
 import {
@@ -49,7 +51,8 @@ export default function JourneyScreen() {
   // Auto-start on mount.
   useEffect(() => {
     dispatch({ type: 'START' });
-  }, [dispatch]);
+    track({ name: 'journey_started', journeyId: journey.id, minutes, intensity });
+  }, [dispatch, journey.id, minutes, intensity]);
 
   // 1Hz timer while playing.
   useEffect(() => {
@@ -78,8 +81,10 @@ export default function JourneyScreen() {
   useEffect(() => {
     if (state.status !== 'completed') return;
     void getAudioEngine().unloadAll();
+    void getRepository().recordCompletion({ journeyId: journey.id, totalSec: journey.totalSec });
+    track({ name: 'journey_completed', journeyId: journey.id, totalSec: journey.totalSec });
     router.replace('/checkin');
-  }, [state.status, router]);
+  }, [state.status, router, journey.id, journey.totalSec]);
 
   const seg = currentSegment(journey, state);
   const meta = seg ? segmentMeta[seg.type] : undefined;

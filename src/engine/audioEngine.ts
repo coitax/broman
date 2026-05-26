@@ -1,11 +1,8 @@
-// Cross-platform audio abstraction.
-//
-// The Journey Player talks only to this interface. For Phase 0 we ship a console
-// no-op implementation so the app runs end-to-end without bundled media. Phase 1
-// swaps in real engines behind the SAME interface:
-//   - native: react-native-track-player (background + lock-screen audio)
-//   - web:    Howler.js / Web Audio API
-// expo-av is the simplest single-API fallback if we want one engine first.
+import { createAudioEngine } from './createAudioEngine';
+
+// Cross-platform audio abstraction. The Journey Player talks only to this
+// interface; the concrete engine is chosen per-platform by createAudioEngine
+// (web: Web Audio API; native: no-op for now, real file playback in Phase 2).
 
 export interface AudioEngine {
   /** Start (or crossfade to) the looping ambient bed. */
@@ -20,7 +17,7 @@ export interface AudioEngine {
   unloadAll(): Promise<void>;
 }
 
-class NoopAudioEngine implements AudioEngine {
+export class NoopAudioEngine implements AudioEngine {
   private log(action: string, detail?: string) {
     if (__DEV__) {
       // eslint-disable-next-line no-console
@@ -37,8 +34,8 @@ class NoopAudioEngine implements AudioEngine {
 
 let engine: AudioEngine | null = null;
 
-/** Singleton accessor — swap the constructed engine here in Phase 1. */
+/** Singleton accessor for the platform-appropriate audio engine. */
 export function getAudioEngine(): AudioEngine {
-  if (!engine) engine = new NoopAudioEngine();
+  if (!engine) engine = createAudioEngine();
   return engine;
 }
