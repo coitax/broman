@@ -37,6 +37,8 @@ export interface JourneyTemplate {
   id: string;
   title: string;
   description: string;
+  /** Premium journeys are gated behind the paid tier. */
+  premium?: boolean;
   movementStyle: MovementStyle;
   /** Default ambient bed if a segment does not override it. */
   defaultAmbient: string;

@@ -19,6 +19,9 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" options={{ title: 'Your morning' }} />
         <Stack.Screen name="journey" options={{ headerShown: false }} />
         <Stack.Screen name="checkin" options={{ title: 'Check in' }} />
+        <Stack.Screen name="library" options={{ title: 'Journeys' }} />
+        <Stack.Screen name="paywall" options={{ title: 'Premium', presentation: 'modal' }} />
+        <Stack.Screen name="reminder" options={{ title: 'Reminder' }} />
       </Stack>
     </SafeAreaProvider>
   );

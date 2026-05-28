@@ -9,8 +9,10 @@ A single Expo (React Native) codebase that runs on the **web today** and compile
 **native iOS/Android** later — no WebView wrapper, so no performance penalty. See the
 full plan for product scope, monetization, and roadmap.
 
-**Status:** Phase 1 (web validation MVP) — real web audio, persistence, and analytics
-are wired. Native builds, alarm, IAP, and the 3D avatar are later phases.
+**Status:** Phase 2 — freemium paywall + premium content gating and the morning
+wake-up reminder are wired (web in-app reminder now; native local-notification
+alarm + EAS build config are written behind platform interfaces, to be built on a
+device). Real native binaries, RevenueCat IAP, and the 3D avatar are later phases.
 
 ## Stack
 
@@ -32,9 +34,15 @@ The core is a **content-driven Journey Engine**:
 - `src/engine/audioEngine.ts` + `createAudioEngine.web.ts` / `webAudioEngine.ts` —
   audio abstraction; web uses a synthesized ambient pad + chimes (Web Audio API)
 - `src/data/` — `Repository` (Supabase or local fallback), `usePreferences` hook
+- `src/billing/` — entitlement store + gating; local mock provider now, Stripe/
+  RevenueCat slot in behind `BillingProvider`
+- `src/reminder/` — wake-up reminder; web persists + shows an in-app prompt, native
+  schedules a daily local notification (`expo-notifications`) behind one interface
 - `src/analytics/` — typed `track()` events with platform-split sinks (PostHog on web)
-- `app/` — Expo Router screens: home → onboarding → journey player → mood check-in
+- `app/` — Expo Router screens: home → onboarding → journey → check-in, plus
+  library (with premium gates), paywall, and reminder settings
 - `supabase/migrations/` — schema + RLS for preferences, check-ins, completions
+- `eas.json` — EAS Build profiles (native builds run on a device/CI, not the web sandbox)
 
 Web-only libraries (PostHog, Web Audio) live in `*.web.ts` files so they never enter
 the native bundle. Adding new journeys/sounds means adding data + media, not code.

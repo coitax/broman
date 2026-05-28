@@ -8,7 +8,10 @@ export type AnalyticsEvent =
   | { name: 'journey_started'; journeyId: string; minutes: number; intensity: string }
   | { name: 'journey_completed'; journeyId: string; totalSec: number }
   | { name: 'checkin_saved'; mood: string; phase: 'pre' | 'post' }
-  | { name: 'paywall_viewed'; source: string };
+  | { name: 'library_opened' }
+  | { name: 'paywall_viewed'; source: string }
+  | { name: 'premium_unlocked' }
+  | { name: 'reminder_set'; hour: number; minute: number; enabled: boolean };
 
 let started = false;
 

@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { track } from '@/analytics';
+import { findJourney } from '@/content/manifests/catalog';
 import { sunriseFlow } from '@/content/manifests/sunriseFlow';
 import type { Intensity } from '@/content/types';
 import { getRepository } from '@/data/repository';
@@ -32,14 +33,16 @@ function parseIntensity(value: string | string[] | undefined): Intensity {
 
 export default function JourneyScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ minutes?: string; intensity?: string }>();
+  const params = useLocalSearchParams<{ id?: string; minutes?: string; intensity?: string }>();
 
+  const id = (Array.isArray(params.id) ? params.id[0] : params.id) ?? sunriseFlow.id;
   const minutes = Number(params.minutes) || 10;
   const intensity = parseIntensity(params.intensity);
 
+  const template = findJourney(id) ?? sunriseFlow;
   const journey = useMemo(
-    () => buildJourney(sunriseFlow, { totalMinutes: minutes, intensity }),
-    [minutes, intensity],
+    () => buildJourney(template, { totalMinutes: minutes, intensity }),
+    [template, minutes, intensity],
   );
 
   const [state, setState] = useState<PlayerState>(initialPlayerState);
