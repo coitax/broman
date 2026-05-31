@@ -11,7 +11,8 @@ export type AnalyticsEvent =
   | { name: 'library_opened' }
   | { name: 'paywall_viewed'; source: string }
   | { name: 'premium_unlocked' }
-  | { name: 'reminder_set'; hour: number; minute: number; enabled: boolean };
+  | { name: 'reminder_set'; hour: number; minute: number; enabled: boolean }
+  | { name: 'pose_studio_opened'; sequenceId: string };
 
 let started = false;
 

@@ -9,10 +9,17 @@ A single Expo (React Native) codebase that runs on the **web today** and compile
 **native iOS/Android** later — no WebView wrapper, so no performance penalty. See the
 full plan for product scope, monetization, and roadmap.
 
-**Status:** Phase 2 — freemium paywall + premium content gating and the morning
-wake-up reminder are wired (web in-app reminder now; native local-notification
-alarm + EAS build config are written behind platform interfaces, to be built on a
-device). Real native binaries, RevenueCat IAP, and the 3D avatar are later phases.
+**Status:** Phase 3 — the rotatable, slow-motion **3D movement studio** (premium)
+is wired on web: orbit/zoom a procedural figure, scrub the timeline, toggle
+slow-mo, switch between yoga/Tai Chi sequences. Earlier phases cover the journey
+engine, real web audio, persistence, analytics, the freemium paywall, and the
+wake-up reminder. Real native binaries, RevenueCat IAP, recorded media, and a
+native 3D viewer (expo-gl) are later passes.
+
+> **Known native-build blocker:** `@supabase/supabase-js` ships a dynamic
+> OpenTelemetry `import()` that Hermes can't parse, so the native (Hermes) bundle
+> currently fails. The web bundle is unaffected. This must be resolved (metro
+> resolver/stub or supabase config) before the first EAS native build.
 
 ## Stack
 
@@ -38,6 +45,10 @@ The core is a **content-driven Journey Engine**:
   RevenueCat slot in behind `BillingProvider`
 - `src/reminder/` — wake-up reminder; web persists + shows an in-app prompt, native
   schedules a daily local notification (`expo-notifications`) behind one interface
+- `src/avatar/` — 3D movement studio: pure pose math (`poses.ts`: interpolate +
+  playhead) drives a procedural humanoid (`Figure.tsx`) rendered by a web-only
+  three.js/react-three-fiber `PoseViewer.web.tsx`; native gets a placeholder so
+  three.js never enters the native bundle
 - `src/analytics/` — typed `track()` events with platform-split sinks (PostHog on web)
 - `app/` — Expo Router screens: home → onboarding → journey → check-in, plus
   library (with premium gates), paywall, and reminder settings

@@ -22,6 +22,7 @@ export default function RootLayout() {
         <Stack.Screen name="library" options={{ title: 'Journeys' }} />
         <Stack.Screen name="paywall" options={{ title: 'Premium', presentation: 'modal' }} />
         <Stack.Screen name="reminder" options={{ title: 'Reminder' }} />
+        <Stack.Screen name="pose" options={{ title: 'Movement studio' }} />
       </Stack>
     </SafeAreaProvider>
   );

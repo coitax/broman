@@ -70,6 +70,7 @@ export default function Home() {
         <Button label="Set up your morning" onPress={() => router.push('/onboarding')} />
         <Button label={quickLabel} variant="ghost" onPress={quickStart} />
         <Button label="Explore journeys" variant="ghost" onPress={() => router.push('/library')} />
+        <Button label="Movement studio (3D)" variant="ghost" onPress={() => router.push('/pose')} />
         <Button label="Wake-up reminder" variant="ghost" onPress={() => router.push('/reminder')} />
       </View>
     </Screen>
