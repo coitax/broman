@@ -16,10 +16,9 @@ engine, real web audio, persistence, analytics, the freemium paywall, and the
 wake-up reminder. Real native binaries, RevenueCat IAP, recorded media, and a
 native 3D viewer (expo-gl) are later passes.
 
-> **Known native-build blocker:** `@supabase/supabase-js` ships a dynamic
-> OpenTelemetry `import()` that Hermes can't parse, so the native (Hermes) bundle
-> currently fails. The web bundle is unaffected. This must be resolved (metro
-> resolver/stub or supabase config) before the first EAS native build.
+The Metro config (`metro.config.js`) forces the CJS entry of
+`@supabase/supabase-js` on iOS/Android because its ESM build contains a
+`import(VARIABLE)` form that Hermes cannot parse. Web keeps the modern ESM entry.
 
 ## Stack
 
